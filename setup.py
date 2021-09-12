@@ -11,12 +11,18 @@ from setuptools.command.build_ext import build_ext
 
 
 class CMakeExtension(Extension):
+    """
+    自定义 Extension 类，忽略原来的 sources、libraries 等参数，交给 CMake 来处理这些事情
+    """
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
 
 class CMakeBuild(build_ext):
+    """
+    自定义 build_ext 类，对 CMakeExtension 的实例，调用 CMake 和 Make 命令来编译它们
+    """
     def run(self):
         try:
             out = subprocess.check_output(['cmake', '--version'])
@@ -34,10 +40,8 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
-        extdir = os.path.abspath(
-            os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -51,7 +55,7 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j4']
+            build_args += ['--', '-j8']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
@@ -59,18 +63,16 @@ class CMakeBuild(build_ext):
             self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args,
-                              cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args,
-                              cwd=self.build_temp)
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
         print()  # Add an empty line for cleaner output
 
 setup(
     name='vocaltractlab',  # 只是pip安装的时候的包名，不是import时候使用的模块名
-    version='0.0.1',
+    version='0.0.2',
     author='Huang Qinlong',
     author_email='qinlonghuang@gmail.com',
-    description='A hybrid Python/C++ test project',
+    description='VocalTractLab python interfaces',
     long_description='',
     # tell setuptools to look for any packages under src
     packages=find_packages('Sources'),
