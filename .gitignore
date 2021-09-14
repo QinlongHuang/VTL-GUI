@@ -141,3 +141,4 @@ build/.cmake/api/v1/reply/target-VocalTractLab-Debug-3b322b48b550cc170c9e.json
 build/.cmake/api/v1/reply/target-vtl-Debug-03aab6dcb03d46128e2a.json
 build/CMakeFiles/rules.ninja
 build/CMakeFiles/3.18.4/CompilerIdCXX/a.out
+.vscode/c_cpp_properties.json
