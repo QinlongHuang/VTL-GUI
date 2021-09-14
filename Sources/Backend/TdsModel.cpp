@@ -2344,7 +2344,7 @@ void TdsModel::updateVariables()
 
   double noiseFilterCoeff = exp(-2.0*M_PI*NOISE_CUTOFF_FREQ*timeStep);
 
-  cout << "In updateVariables:  " << endl;
+  // cout << "In updateVariables:  " << endl;
   for (i=0; i < NUM_BRANCH_CURRENTS; i++)
   {
     bc = &branchCurrent[i];
