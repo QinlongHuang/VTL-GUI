@@ -448,9 +448,9 @@ void Tube::setVelumOpening(const double openingArea_cm2)
   {
     ts = &noseSection[i];
     ts->area_cm2 = openingArea_cm2 + ((double)(i*i)*(targetArea_cm2 - openingArea_cm2)) / (double)(N*N);
-    if (ts->area_cm2 < 0.001) 
+    if (ts->area_cm2 < 0.01) 
     { 
-      ts->area_cm2 = 0.001; 
+      ts->area_cm2 = 0.01; 
     }
     ts->volume_cm3 = ts->area_cm2 * ts->length_cm;
   }

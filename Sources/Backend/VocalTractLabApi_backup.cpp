@@ -942,23 +942,6 @@ int vtlGetAnatomyParams(double *ana_params)
   return 0;
 }
 
-// int vtlSetAnatomyParams(vector<double> params)
-// {
-//   if (!vtlApiInitialized)
-//   {
-//     printf("Error: The API has not been initialized.\n");
-//     return 1;
-//   }
-//   for (int i=0; i<AnatomyParams::NUM_ANATOMY_PARAMS; i++)
-//   {
-//     anatomyParams->param[i].x = params[i];
-//   }
-
-//   anatomyParams->setFor(vocalTract);
-
-//   return 0;
-// }
-
 vector<double> vtlSynthAudio(vector<double> tractParams, vector<double> glottisParams, int numFrames, 
   int frameStep_samples)
 {

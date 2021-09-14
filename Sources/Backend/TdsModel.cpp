@@ -1008,6 +1008,7 @@ void TdsModel::prepareTimeStep()
         a = MIN_RADIUS_CM;
         b = ts->area / (M_PI*a);
 
+        getchar();
         // if ( fabs(b) < min_b ) { min_b = fabs(b); }
       }
 
