@@ -65,8 +65,6 @@ set(Backend
     "Sources/Backend/SegmentSequence.h"
     "Sources/Backend/Signal.cpp"
     "Sources/Backend/Signal.h"
-    # "Sources/Backend/SoundLib.cpp"
-    # "Sources/Backend/SoundLib.h"
     "Sources/Backend/Splines.cpp"
     "Sources/Backend/Splines.h"
     "Sources/Backend/StaticPhone.cpp"
@@ -111,6 +109,7 @@ if(with_GUI)
     source_group("" FILES ${no_group_source_files})
 
     set(Frontend
+    "Sources/Backend/SoundLib.cpp" "Sources/Backend/SoundLib.h"
     "Sources/Frontend/AnalysisResultsDialog.cpp" "Sources/Frontend/AnalysisResultsDialog.h"
     "Sources/Frontend/AnalysisSettingsDialog.cpp" "Sources/Frontend/AnalysisSettingsDialog.h"
     "Sources/Frontend/AnatomyParamsDialog.cpp" "Sources/Frontend/AnatomyParamsDialog.h"
