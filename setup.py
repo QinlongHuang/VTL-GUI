@@ -73,7 +73,6 @@ setup(
     name='vocaltractlab',  # 只是pip安装的时候的包名，不是import时候使用的模块名
     version='0.0.2',
     author='Huang Qinlong',
-    home_page="https://github.com/QinlongHuang/VTL-GUI",
     author_email='qinlonghuang@gmail.com',
     description='VocalTractLab python interfaces',
     long_description='',

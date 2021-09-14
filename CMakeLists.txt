@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(VocalTractLab 
         VERSION 0.2
@@ -65,8 +65,8 @@ set(Backend
     "Sources/Backend/SegmentSequence.h"
     "Sources/Backend/Signal.cpp"
     "Sources/Backend/Signal.h"
-    "Sources/Backend/SoundLib.cpp"
-    "Sources/Backend/SoundLib.h"
+    # "Sources/Backend/SoundLib.cpp"
+    # "Sources/Backend/SoundLib.h"
     "Sources/Backend/Splines.cpp"
     "Sources/Backend/Splines.h"
     "Sources/Backend/StaticPhone.cpp"
