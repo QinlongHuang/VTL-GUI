@@ -264,34 +264,34 @@ void Synthesizer::add(double *newGlottisParams, Tube *newTube,
     // Scale the output to the range [-1, +1].
     audio[i] = outputPressureFilter.getOutputSample(outputPressure[k]) * 1e-7;
 
-    try
-    {
-      std::cout << "-----------------------------------------------------------------" << endl; 
-      std::cout << "pos: " << pos << "\ti: "<< i << 
-      "\npressure_dPa[0]: " << pressure_dPa[0] << 
-      "\npressure_dPa[1]: " << pressure_dPa[0] << 
-      "\npressure_dPa[2]: " << pressure_dPa[0] << 
-      "\npressure_dPa[3]: " << pressure_dPa[0] << 
-      "\noutputFlow[k](totalFlow_cm3_s): " << outputFlow[k] << 
-      "\noutputFlow[(k-1) & TDS_BUFFER_MASK]: " << outputFlow[(k-1) & TDS_BUFFER_MASK] << 
-      "\nmouthFLow_cm3_s: " << mouthFlow_cm3_s << 
-      "\nnostrilFlow_cm3_s: " << nostrilFlow_cm3_s << 
-      "\nskinFlow_cm3_s: " << skinFlow_cm3_s << 
-      "\noutputPressure: " << outputPressure[k] <<
-      "\naudio[i]: " << audio[i] << endl;
+    // try
+    // {
+    //   if ( fabs(audio[i]) > max_audio ) { max_audio = fabs(audio[i]); }
+    //   std::cout << "pos: " << pos << "\ti: "<< i << 
+    //   "\npressure_dPa[0]: " << pressure_dPa[0] << 
+    //   "\npressure_dPa[1]: " << pressure_dPa[0] << 
+    //   "\npressure_dPa[2]: " << pressure_dPa[0] << 
+    //   "\npressure_dPa[3]: " << pressure_dPa[0] << 
+    //   "\noutputFlow[k](totalFlow_cm3_s): " << outputFlow[k] << 
+    //   "\noutputFlow[(k-1) & TDS_BUFFER_MASK]: " << outputFlow[(k-1) & TDS_BUFFER_MASK] << 
+    //   "\nmouthFLow_cm3_s: " << mouthFlow_cm3_s << 
+    //   "\nnostrilFlow_cm3_s: " << nostrilFlow_cm3_s << 
+    //   "\nskinFlow_cm3_s: " << skinFlow_cm3_s << 
+    //   "\noutputPressure: " << outputPressure[k] <<
+    //   "\naudio[i]: " << audio[i] << 
+    //   "\nmax_audio: " << max_audio << endl;
+    //   std::cout << "-----------------------------------------------------------------" << endl; 
 
-      if (fabs(audio[i]) > 1)
-      {
-        getchar();
-      }
-      if (std::isnan(audio[i]))
-      {
-        throw -1;
-      }
-    } catch(int e)
-    {
-      exit(-1);
-    }
+    //   if ( fabs(audio[i]) > 600 ) { getchar(); }
+
+    //   if (std::isnan(audio[i]))
+    //   {
+    //     throw -1;
+    //   }
+    // } catch(int e)
+    // {
+    //   exit(-1);
+    // }
   }
 
   // ****************************************************************

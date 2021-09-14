@@ -48,7 +48,6 @@ const double TdsModel::NOISE_CUTOFF_FREQ = 500.0;
 // double tmp_area = 0.0;
 // double tmp_flow = 0.0;
 
-// int cut_b_counter = 0;
 // double min_b = 1.0;
 // double max_R = 0.0;
 // double max_D = 0.0;
@@ -939,7 +938,7 @@ double TdsModel::proceedTimeStep(double& mouthFlow_cm3_s, double& nostrilFlow_cm
   // << "  max_F=" << max_F << "  max_G=" << max_G << "  max_H=" << max_H << "  max_S=" << max_S
   // << "  max_solutionV=" << max_solutionV
   // << "  max_pressure=" << max_pressure << "  max_magnitude=" << max_magnitude
-  // << "  min_b=" << min_b << " cut_b_counter=" << cut_b_counter << "\n"
+  // << "  min_b=" << min_b
   // << endl;
 
   return radiatedFlow;
@@ -1007,8 +1006,7 @@ void TdsModel::prepareTimeStep()
       {
         a = MIN_RADIUS_CM;
         b = ts->area / (M_PI*a);
-
-        getchar();
+        
         // if ( fabs(b) < min_b ) { min_b = fabs(b); }
       }
 
@@ -1017,13 +1015,6 @@ void TdsModel::prepareTimeStep()
       ts->R[0] = ((2.0 * AIR_VISCOSITY_CGS * ts->length) * (a * a + b * b)) / (M_PI*a*a*a*b*b*b);
       ts->R[1] = ts->R[0];
 
-      // if (b < 0.001 && i >= 65)
-      // {
-      //   cout << "  In tube section #" << i << ". Before cut off, b=" << b 
-      //   << "  ts->R=" << ts->R[0]
-      //   << endl;
-      //   getchar();
-      // }
     }
 
     // **************************************************************
@@ -1270,11 +1261,6 @@ void TdsModel::calcNoiseSources()
   int i, k;
   TubeSection *ts = NULL;
   NoiseSource *s = NULL;
-
-  // if (getSampleIndex() == 47647 || getSampleIndex() == 47648)
-  // {
-  //   cout << "\tIn calcNoiseSources:" << endl;
-  // }
 
   // ****************************************************************
   // Reset the target amplitude of all noise sources.
@@ -1699,6 +1685,7 @@ void TdsModel::calcNoiseSources()
 
     cons->fullAmp = cons->gain*fabs(cons->velocity)*
       cons->velocity*cons->velocity*sqrt(cons->area);   // Stevens' book
+
     // if (fabs(cons->fullAmp) > max_fullAmp) 
     // { 
     //   max_fullAmp = fabs(cons->fullAmp); 
@@ -1909,7 +1896,7 @@ void TdsModel::calcNoiseSample(NoiseSource *s, double ampThreshold, bool printFl
     s->sample = 0.0;
     return;
   }
-   
+
   // ****************************************************************
   // The source is active.
   // ****************************************************************
@@ -1945,7 +1932,7 @@ void TdsModel::calcNoiseSample(NoiseSource *s, double ampThreshold, bool printFl
   // Multiplication with factor is necessary due to the radiation
   // characteristics.
   filterGain *= factor * sqrt(factor);
-   
+
   // ****************************************************************
   // Insert a new random number into the input buffer and
   // do the recursive filtering.
@@ -2232,7 +2219,6 @@ void TdsModel::calcMatrix()
 
       // if (fabs(S) > max_S) { max_S = fabs(S); }
 
-
       // ************************************************************
       // There is a parallel outflowing current.
       // ************************************************************
@@ -2358,7 +2344,7 @@ void TdsModel::updateVariables()
 
   double noiseFilterCoeff = exp(-2.0*M_PI*NOISE_CUTOFF_FREQ*timeStep);
 
-  // cout << "In updateVariables:  " << endl;
+  cout << "In updateVariables:  " << endl;
   for (i=0; i < NUM_BRANCH_CURRENTS; i++)
   {
     bc = &branchCurrent[i];
@@ -2370,7 +2356,7 @@ void TdsModel::updateVariables()
     bc->magnitudeRate = (bc->magnitude - oldCurrent)/(timeStep*THETA) - (THETA1/THETA)*bc->magnitudeRate;
     bc->noiseMagnitude = (1.0-noiseFilterCoeff)*bc->magnitude + noiseFilterCoeff*bc->noiseMagnitude;
 
-    // if (fabs(bc->magnitude) > max_magnitude) { max_magnitude = fabs(bc->magnitude); }
+    if (fabs(bc->magnitude) > max_magnitude) { max_magnitude = fabs(bc->magnitude); }
 
     // cout << "  Branch Current #" << i << ":"
     //   << "  sourceTs=" << bc->sourceSection << "  targetTs=" << bc->targetSection
@@ -2392,7 +2378,7 @@ void TdsModel::updateVariables()
     oldPressure = ts->pressure;
     ts->pressure = ts->D + ts->E*netFlow;
 
-    // if (fabs(ts->pressure) > max_pressure) { max_pressure = fabs(ts->pressure); }
+    if (fabs(ts->pressure) > max_pressure) { max_pressure = fabs(ts->pressure); }
 
     ts->pressureRate = (ts->pressure - oldPressure)/(timeStep*THETA) - ts->pressureRate*(THETA1/THETA);
 
@@ -2659,7 +2645,7 @@ double TdsModel::getCurrentIn(const int section)
 /// Returns the volume velocity out of the given tube section.
 /// \param section The tube section
 // ****************************************************************************
-    
+
 double TdsModel::getCurrentOut(const int section)
 {
   double flow = 0.0;

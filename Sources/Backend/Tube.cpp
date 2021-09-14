@@ -54,7 +54,7 @@ const double Tube::STANDARD_WALL_RESISTANCE_CGS = 5000.0;
 const double Tube::STANDARD_WALL_STIFFNESS_CGS = 100000.0;
 
 
-const double Tube::MIN_AREA_CM2 = 0.01e-2;  // 0.01 mm^2
+const double Tube::MIN_AREA_CM2 = 0.1e-2;  // 0.01 mm^2，0.01 may cause 'nan'.
 
 // This is the default strength of the aspiration source with respect 
 // to the maximum strength (=0 dB).
@@ -448,10 +448,7 @@ void Tube::setVelumOpening(const double openingArea_cm2)
   {
     ts = &noseSection[i];
     ts->area_cm2 = openingArea_cm2 + ((double)(i*i)*(targetArea_cm2 - openingArea_cm2)) / (double)(N*N);
-    if (ts->area_cm2 < 0.01) 
-    { 
-      ts->area_cm2 = 0.01; 
-    }
+    if (ts->area_cm2 < MIN_AREA_CM2) { ts->area_cm2 = MIN_AREA_CM2; }
     ts->volume_cm3 = ts->area_cm2 * ts->length_cm;
   }
 }
