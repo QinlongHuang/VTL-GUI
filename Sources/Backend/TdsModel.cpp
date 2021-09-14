@@ -2356,7 +2356,7 @@ void TdsModel::updateVariables()
     bc->magnitudeRate = (bc->magnitude - oldCurrent)/(timeStep*THETA) - (THETA1/THETA)*bc->magnitudeRate;
     bc->noiseMagnitude = (1.0-noiseFilterCoeff)*bc->magnitude + noiseFilterCoeff*bc->noiseMagnitude;
 
-    if (fabs(bc->magnitude) > max_magnitude) { max_magnitude = fabs(bc->magnitude); }
+    // if (fabs(bc->magnitude) > max_magnitude) { max_magnitude = fabs(bc->magnitude); }
 
     // cout << "  Branch Current #" << i << ":"
     //   << "  sourceTs=" << bc->sourceSection << "  targetTs=" << bc->targetSection
@@ -2378,7 +2378,7 @@ void TdsModel::updateVariables()
     oldPressure = ts->pressure;
     ts->pressure = ts->D + ts->E*netFlow;
 
-    if (fabs(ts->pressure) > max_pressure) { max_pressure = fabs(ts->pressure); }
+    // if (fabs(ts->pressure) > max_pressure) { max_pressure = fabs(ts->pressure); }
 
     ts->pressureRate = (ts->pressure - oldPressure)/(timeStep*THETA) - ts->pressureRate*(THETA1/THETA);
 
