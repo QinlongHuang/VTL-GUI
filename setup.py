@@ -71,9 +71,9 @@ class CMakeBuild(build_ext):
 
 setup(
     name='vocaltractlab',  # 只是pip安装的时候的包名，不是import时候使用的模块名
-    version='0.0.2',
+    version='0.0.4',
     author='Huang Qinlong',
-    author_email='qinlonghuang@gmail.com',
+    author_email='huangqinlong@pku.edu.cn',
     description='VocalTractLab python interfaces',
     long_description='',
     # tell setuptools to look for any packages under src

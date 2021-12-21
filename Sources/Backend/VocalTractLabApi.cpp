@@ -4,10 +4,27 @@
 #include "XmlHelper.h"
 #include "XmlNode.h"
 #include "TlModel.h"
+#include "Geometry.h"
+
 
 #include <iostream>
+#include <fstream>
+#include <string>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#include <GL/glut.h>
+#endif
+
+#include "bitmap_image.hpp"
 
 using namespace std;
+
+// // For OpenGL rendering
+// static VocalTract *vTract;
+// static VocalTractPicture *vtPicture;
 
 VocalTractLab::VocalTractLab(const string speakerFileName)
 {
@@ -16,6 +33,7 @@ VocalTractLab::VocalTractLab(const string speakerFileName)
   // ****************************************************************
   vocalTract = new VocalTract();
   vocalTract->calculateAll();
+  // vTract = vocalTract;
 
   // ****************************************************************
   // Init the list with glottis models
@@ -56,6 +74,11 @@ VocalTractLab::VocalTractLab(const string speakerFileName)
   tube = new Tube();
 
   anatomyParams = new AnatomyParams();
+
+  // ****************************************************************
+  // Init the Vocal Tract Picture.
+  // ****************************************************************
+  vtPicture  = new VocalTractPicture(vocalTract);
 }
 
 bool VocalTractLab::vtlLoadSpeaker(string speakerFileName, VocalTract *vocalTract, 
@@ -231,6 +254,18 @@ int VocalTractLab::vtlSetAnatomyParams(vector<double> params)
   return 0;
 }
 
+int VocalTractLab::vtlSetAnatomyParams2(double* params)
+{
+  for (int i=0; i<AnatomyParams::NUM_ANATOMY_PARAMS; i++)
+  {
+    anatomyParams->param[i].x = *params;
+    params++;
+  }
+
+  anatomyParams->setFor(vocalTract);
+  return 0;
+}
+
 vector<double> VocalTractLab::vtlGetAnatomyParams()
 {
   vector<double> ana_params;
@@ -299,6 +334,191 @@ vector<double> VocalTractLab::vtlSynthAudio(vector<double> tractParams, vector<d
   return audio;
 }
 
+vector<string> VocalTractLab::vtlGetEMANames()
+{
+  vector<string> ema_names = {"TBX", "TBY", "TMX", "TMY", "TTX", "TTY", "ULX", "ULY", "LLX", "LLY", "JAWX", "JAWY"};
+
+  return ema_names;
+}
+
+vector<double> VocalTractLab::vtlTract2EMA(vector<double> tractParams, int numFrames)
+{
+  vtlSynthesisReset();
+  vocalTract->setDefaultEmaPoints();
+  int numEmaPoints = (int)vocalTract->emaPoints.size();
+
+  vector<double> ema;
+  ema.resize(numFrames * numEmaPoints * 2);
+  Point3D P;
+  
+  for (int i=0; i < numFrames; i++)
+  {
+    for (int j  = 0; j < VocalTract::NUM_PARAMS; j++)
+    {
+      VocalTract::Param *param = &(vocalTract->param[j]);
+      param->x = tractParams[i*VocalTract::NUM_PARAMS + j];
+      param->limitedX = param->x;
+    }
+    vocalTract->calculateAll();
+    for (int k = 0; k < numEmaPoints; k++)
+    {
+      P = vocalTract->getEmaPointCoord(k);
+      ema[i * numEmaPoints * 2 + k * 2] = P.x;
+      ema[i * numEmaPoints * 2 + k * 2 + 1] = P.y;
+    }
+  }
+
+  return ema;
+}
+
+int VocalTractLab::vtlExportTractSvg(vector<double> tractParams, const char *fileName, bool addCenterLine, bool addCutVectors)
+{
+
+  for (int i=0; i < VocalTract::NUM_PARAMS; i++)
+  {
+    vocalTract->param[i].x = tractParams[i];
+  }
+
+  vocalTract->calculateAll();
+
+  bool ok = vocalTract->exportTractContourSvg(string(fileName), addCenterLine, addCutVectors);
+  if (ok)
+  {
+    return 0;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+int VocalTractLab::vtlSaveTractFrame( double* tractParams, const char *fileName)
+{
+  int arg = 0;
+  char **argv=NULL;
+
+  glutInit(&arg, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(400, 400); //Set the window size
+  glutCreateWindow("Test");
+
+  cout << "Rendering Frame..." << endl;
+  for (int i=0; i < VocalTract::NUM_PARAMS; i++)
+  {
+    vocalTract->param[i].x = *tractParams;
+    tractParams++;
+  }
+  vocalTract->calculateAll();
+  vtPicture->setVocalTract(vocalTract);
+  vtPicture->display();
+
+  GLint viewport[4];  // current viewport
+  glGetIntegerv(GL_VIEWPORT, viewport);  // get current viewport
+  int w = viewport[2];
+  int h = viewport[3];
+
+  unsigned char* imageData = (unsigned char *)malloc((int)(400*400*3));  // allocate memory for image
+  glReadPixels(0, 0, 400, 400, GL_BGR, GL_UNSIGNED_BYTE, imageData);  // copy data
+  // build writer
+  bitmap_image image(400, 400);
+  image_drawer draw(image);
+
+// write from imageData to bitmap image
+  for (unsigned int i=0; i < h; i++)
+  {
+    for (unsigned int j=0; j < w; j++)
+    {
+      image.set_pixel(j, h-1-i, *(imageData+2), *(imageData+1), *(imageData+3));
+      imageData += 3;
+    }
+  }
+
+  image.save_image(fileName);
+  cout << "Rendered Frame ! Saved image to " << fileName << endl;
+}
+
+int VocalTractLab::vtlSaveTractVideo(int numFrames, double* tractParams, const char *folderName)
+{
+
+  int arg = 0;
+  char **argv=NULL;
+
+  glutInit(&arg, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(400, 400); //Set the window size
+  glutCreateWindow("Test");
+
+  for (int frameIndex = 0; frameIndex < numFrames; frameIndex++)
+  {
+    string fileName(folderName);
+    fileName += "/vt" + to_string(frameIndex) + ".bmp";
+
+    cout << "Rendering frame #" << frameIndex << "..." << endl;
+
+    for (int i=0; i < VocalTract::NUM_PARAMS; i++)
+    {
+      vocalTract->param[i].x = *tractParams;
+      tractParams++;
+    }
+    vocalTract->calculateAll();
+    vtPicture->setVocalTract(vocalTract);
+
+    vtPicture->display();
+    GLint viewport[4];  //current viewport
+    glGetIntegerv(GL_VIEWPORT, viewport);  //get current viewport
+
+    int w = viewport[2];
+    int h = viewport[3];
+
+    unsigned char* imageData = (unsigned char *)malloc((int)(400*400*(3)));
+	  glReadPixels(0, 0, 400, 400, GL_BGR, GL_UNSIGNED_BYTE, imageData);
+    //write 
+    bitmap_image image(400,400);
+    image_drawer draw(image);
+
+    for (unsigned int i = 0; i < h; ++i)
+    {
+      for (unsigned int j = 0; j < w; ++j)
+      {
+        image.set_pixel(j, h-1-i, *(imageData+2),*(imageData+1), *(imageData+3));
+        imageData += 3;
+      }
+    }
+
+    image.save_image(fileName);
+    cout << "Frame #" << frameIndex << " has stored in " << fileName << endl;
+  }
+  
+}
+
+VocalTractLab* VTL_new(const char *speakerFileName) 
+{ 
+  return new VocalTractLab(speakerFileName); 
+}
+
+int setAnatomy(VocalTractLab* ptr, double *val)
+{
+  return ptr->vtlSetAnatomyParams2(val);
+}
+
+int exportVTFrame(VocalTractLab* ptr, double* tractParams, const char *fileName) 
+{ 
+  return ptr->vtlSaveTractFrame(tractParams, fileName); 
+}
+
+int exportVTVideo(VocalTractLab* ptr, int numFrames, double* tractParams, const char* folderName)
+{
+  return ptr->vtlSaveTractVideo(numFrames, tractParams, folderName);
+}
+
+void VTL_delete(VocalTractLab* ptr)
+{
+  if (ptr)
+  {
+    delete ptr;
+    ptr = nullptr;
+  }
+}
 
 
 

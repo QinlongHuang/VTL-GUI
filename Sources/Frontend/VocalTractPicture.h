@@ -99,7 +99,7 @@ public:
   bool isRoughCenterLine;
   bool showCutVectors;
   bool showTongueCrossSections;
-  bool crossSectionWithTongue;
+  bool crossSectio nWithTongue;
   RenderMode renderMode;
   bool renderBothSides;
   int selectedControlPoint;

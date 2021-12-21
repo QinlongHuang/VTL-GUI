@@ -5144,7 +5144,7 @@ void VocalTract::calcCenterLine()
 
   for (i=0; i < NUM_CENTERLINE_POINTS; i++)
   {
-    pos = muLength*(double)i / (double)(NUM_CENTERLINE_POINTS-1);
+    pos = muLength*(double)i / (double)(NUM_CENTERLINE_POINTS-1);  // Inherent position of each CenterLinePoint
 
     // Get the point on the mu-line and the corresponding normal vector.
     if (pos <= muSectionLength[0])

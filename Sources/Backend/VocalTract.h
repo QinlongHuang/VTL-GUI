@@ -254,9 +254,9 @@ public:
 
   struct CenterLinePoint
   {
-    Point2D point;
-    Point2D normal;
-    double pos;
+    Point2D point;  // 2D point
+    Point2D normal;  // normal vector
+    double pos;  // total length relative to the first point.
     double min, max;
     double reserved;
   };

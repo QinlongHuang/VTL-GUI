@@ -1,0 +1,39 @@
+2021.12.14
+Task：
+    1. 控制参数 (tractParams) -> EMA
+    2. 控制参数 (tractParams) -> 剖面图
+    3. EMA -> 剖面图
+    4. 控制参数 (tractParams) -> 动画
+
+Analysis：
+    1.1. 控制参数是三维模型的参数（19维，由VocalTract::ParamIndex定义），拿到控制参数后会计算一系列中间参数（VocalTract::calculateAll(); ），
+    最后得到控制tube模型的一维的tube radius(VocalTract::getTube(); )
+    1.2. 中间参数的计算包括：
+        1.2.1 calcSurfaces()
+            Surface表示了三维的声道模型，由一个2D的顶点（vertex，由Geometry::Point3D，定义了XYZ坐标）数组组成，每4个相邻的顶点之间有两个三角形，
+            Tile应该是Surface的边界框（bounding box），它包含了所有与它重叠的三角形的索引，从而更快的完成交点（intersection point）计算。
+            rib和ribPoint本质上是二维Vertex数组的第一维和第二维的索引。
+            这个函数会计算三维模型的所有surfaces（Surface种类由VocalTract::SurfaceIndex定义，一共有32个），本质上就是计算所有的Vertex，即所有的三维点Point3D。
+
+        1.2.2 calcCenterLine()
+            CenterLine表示了二维的声道模型，表示了从glottis到lip的共计127个CenterLinePoint（由VocalTract::CenterLinePoint定义，包括Point2D的坐标（point），
+            法向量（normal），最值（min，max），当前点相对于起点的总长度（pos）（累加长度））
+
+        1.2.3 calcCrossSections()
+            为CenterLine上的每个CenterLinePoint的切向量计算横截面轮廓（cross-sectional profile）crossSection（由VocalTract::CrossSection定义，包括
+            area,  面积
+            circ,  周长
+            pos,  和CenterLinePoint的pos一致
+            articulator, 当前区域的发音器官）
+
+        1.2.4 crossSectionsToTubeSections()
+            用最小范数从分段线性面积函数中计算分段常数面积函数？
+            tubeSection包括
+            area, 
+            circ, 
+            pos, 
+            length, 
+            articulator
+
+
+    2. 
